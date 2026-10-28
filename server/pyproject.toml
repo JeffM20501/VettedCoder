@@ -17,3 +17,35 @@ server = "server:main"
 [build-system]
 requires = ["uv_build>=0.12.23,<0.13.0"]
 build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "channels>=4.3.2",
+    "factory-boy>=3.3.3",
+    "fakeredis>=2.40.0",
+    "moto>=5.2.5",
+    "psycopg[binary]>=3.3.6",
+    "pytest>=9.2.0",
+    "pytest-asyncio>=1.4.1",
+    "pytest-cov>=7.1.0",
+    "pytest-django>=4.14.0",
+    "respx>=0.23.1",
+    "time-machine>=3.6.0",
+]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+python_files = ["test_*.py"]
+addopts = "--strict-markers -ra"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+markers = [
+    "unit: Isolated unit tests without external resources",
+    "integration: Multi-component database or service integration tests",
+    "security: IDOR, authorization matrix, credential isolation, and rate-limit tests",
+    "ws: Django Channels WebSocket and real-time ticket tests",
+    "slow: Tests with extensive permutations or heavy calculations",
+    "spec: Forward-looking specification tests against unbuilt code",
+    "runner_required: Code-runner execution sandboxing and boundary tests",
+]
+
