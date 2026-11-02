@@ -1,4 +1,3 @@
-import os
 import boto3
 import fakeredis
 import pytest
@@ -15,6 +14,7 @@ except ImportError:
 @pytest.fixture
 def clock():
     """Unified clock fixture wrapping time-machine per spec."""
+
     class ClockController:
         def __init__(self):
             self._traveller = None

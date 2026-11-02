@@ -1,9 +1,8 @@
-import time
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+
 import pytest
-from django.apps import apps
-from django.db import connection, models
+from django.db import models
 
 
 @pytest.mark.spec
@@ -22,7 +21,7 @@ def test_uuidv7_pk__generated_in_app__is_time_sortable(clock):
         name = models.CharField(max_length=50)
 
     # Generate IDs across time intervals
-    clock.set(datetime(2026, 1, 1, 10, 0, 0, tzinfo=timezone.utc))
+    clock.set(datetime(2026, 1, 1, 10, 0, 0, tzinfo=UTC))
     id_1 = DummyUUIDModel().id
     clock.tick(1)
     id_2 = DummyUUIDModel().id
@@ -51,7 +50,7 @@ def test_timestamps__model_create_and_update__sets_utc_timestamps_correctly(cloc
 
         title = models.CharField(max_length=100)
 
-    start_time = datetime(2026, 3, 15, 12, 0, 0, tzinfo=timezone.utc)
+    start_time = datetime(2026, 3, 15, 12, 0, 0, tzinfo=UTC)
     clock.set(start_time)
 
     instance = DummyTimestampModel.objects.create(title="Initial")
@@ -60,7 +59,7 @@ def test_timestamps__model_create_and_update__sets_utc_timestamps_correctly(cloc
 
     # Advance clock and update
     clock.tick(30)
-    later_time = datetime(2026, 3, 15, 12, 0, 30, tzinfo=timezone.utc)
+    later_time = datetime(2026, 3, 15, 12, 0, 30, tzinfo=UTC)
     instance.title = "Modified"
     instance.save()
     instance.refresh_from_db()

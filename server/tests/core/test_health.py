@@ -1,4 +1,5 @@
 from unittest.mock import patch
+
 import pytest
 from django.db import OperationalError
 
@@ -21,7 +22,10 @@ def test_health_check__db_unavailable__returns_503_service_unavailable(client):
     """
     GET /api/v1/health/ returns 503 when the database connection fails.
     """
-    with patch("django.db.backends.base.base.BaseDatabaseWrapper.cursor", side_effect=OperationalError("Connection refused")):
+    with patch(
+        "django.db.backends.base.base.BaseDatabaseWrapper.cursor",
+        side_effect=OperationalError("Connection refused"),
+    ):
         response = client.get("/api/v1/health/")
         assert response.status_code == 503
         data = response.json()

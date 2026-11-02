@@ -1,5 +1,6 @@
 import json
 import uuid
+
 import pytest
 from django.test import RequestFactory
 
@@ -65,7 +66,9 @@ def test_error_envelope__on_429_rate_limited__conforms_to_spec_shape(client):
     request = factory.get("/api/v1/auth/login/")
     from apps.core.exceptions import custom_exception_handler
 
-    response = custom_exception_handler(RateLimitExceededException("Too many requests"), {"request": request})
+    response = custom_exception_handler(
+        RateLimitExceededException("Too many requests"), {"request": request}
+    )
     assert response.status_code == 429
     assert_error_envelope_shape(response.data)
 
@@ -86,8 +89,8 @@ def test_error_envelope__on_500_server_error__conforms_to_spec_shape(client):
 @pytest.mark.spec
 @pytest.mark.security
 def test_error_envelope__unhandled_exception_or_db_error__never_leaks_sql_or_traceback():
-    from django.db import DatabaseError
     from apps.core.exceptions import custom_exception_handler
+    from django.db import DatabaseError
 
     factory = RequestFactory()
     request = factory.get("/api/v1/questions/")

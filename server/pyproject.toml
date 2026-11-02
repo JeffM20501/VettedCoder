@@ -21,15 +21,18 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "channels>=4.3.2",
+    "django-stubs>=6.1.2",
     "factory-boy>=3.3.3",
     "fakeredis>=2.40.0",
     "moto>=5.2.5",
+    "mypy>=2.4.1",
     "psycopg[binary]>=3.3.6",
     "pytest>=9.2.0",
     "pytest-asyncio>=1.4.1",
     "pytest-cov>=7.1.0",
     "pytest-django>=4.14.0",
     "respx>=0.23.1",
+    "ruff>=0.17.3",
     "time-machine>=3.6.0",
 ]
 
@@ -48,4 +51,36 @@ markers = [
     "spec: Forward-looking specification tests against unbuilt code",
     "runner_required: Code-runner execution sandboxing and boundary tests",
 ]
+
+[tool.ruff]
+target-version = "py314"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "S",   # flake8-bandit
+    "DJ",  # flake8-django
+]
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+# Legacy hardcoded SECRET_KEY in scaffolded boilerplate; will move to environment variable
+"app/settings.py" = ["S105"]
+"tests/**" = ["S101", "S105", "S106"]
+
+[tool.mypy]
+python_version = "3.14"
+plugins = ["mypy_django_plugin.main"]
+ignore_missing_imports = true
+check_untyped_defs = true
+warn_unused_ignores = true
+
+[tool.django-stubs]
+django_settings_module = "config.settings.test"
+
 

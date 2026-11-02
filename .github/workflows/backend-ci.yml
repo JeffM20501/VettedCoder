@@ -1,0 +1,217 @@
+name: Backend CI
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: server
+
+jobs:
+  lint-and-types:
+    name: Lint & Types
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@1edb52594c857e2b5b13128931090f0640537287 # v5.3.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: "server/uv.lock"
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Ruff check
+        run: uv run ruff check .
+
+      - name: Ruff format check
+        run: uv run ruff format --check .
+
+      - name: Mypy type check
+        run: uv run mypy .
+
+  migrations:
+    name: Migrations Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@1edb52594c857e2b5b13128931090f0640537287 # v5.3.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: "server/uv.lock"
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Check for model migrations
+        run: |
+          # Detect whether any domain applications are installed before checking migrations
+          HAS_APPS=$(uv run python -c "
+          import os, django
+          os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings.test'
+          django.setup()
+          from django.apps import apps
+          from config.settings.test import DOMAIN_APPS
+          custom = [app for app in DOMAIN_APPS if apps.is_installed(app)]
+          print('true' if custom else 'false')
+          ")
+          if [ "$HAS_APPS" = "true" ]; then
+            uv run python manage.py makemigrations --check --dry-run --settings=config.settings.test
+          else
+            echo "No domain apps with models exist yet. Skipping makemigrations check."
+          fi
+
+  tests-blocking:
+    name: Tests (Blocking)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_DB: vettedcoder_test
+          POSTGRES_USER: vettedcoder
+          POSTGRES_PASSWORD: vettedcoder_ci_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: vettedcoder_test
+      POSTGRES_USER: vettedcoder
+      POSTGRES_PASSWORD: vettedcoder_ci_password
+      REDIS_URL: redis://localhost:6379/0
+      SECRET_KEY: ci-test-secret-key-32-chars-minimum-length-xxx
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@1edb52594c857e2b5b13128931090f0640537287 # v5.3.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: "server/uv.lock"
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Run blocking tests
+        run: |
+          BLOCKING_FILE="../.github/ci/blocking-tests.txt"
+          if [ ! -f "$BLOCKING_FILE" ]; then
+            echo "no blocking modules yet"
+            exit 0
+          fi
+          TEST_PATHS=$(grep -v '^[[:space:]]*#' "$BLOCKING_FILE" | grep -v '^[[:space:]]*$' || true)
+          if [ -z "$TEST_PATHS" ]; then
+            echo "no blocking modules yet"
+            exit 0
+          fi
+          echo "Running blocking tests for: $TEST_PATHS"
+          uv run pytest $TEST_PATHS
+
+  tests-full-informational:
+    name: Tests (Full Suite)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    continue-on-error: true
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_DB: vettedcoder_test
+          POSTGRES_USER: vettedcoder
+          POSTGRES_PASSWORD: vettedcoder_ci_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: vettedcoder_test
+      POSTGRES_USER: vettedcoder
+      POSTGRES_PASSWORD: vettedcoder_ci_password
+      REDIS_URL: redis://localhost:6379/0
+      SECRET_KEY: ci-test-secret-key-32-chars-minimum-length-xxx
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@1edb52594c857e2b5b13128931090f0640537287 # v5.3.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: "server/uv.lock"
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Run test suite
+        run: uv run pytest --junitxml=junit-backend.xml
+
+      - name: Upload JUnit XML report
+        if: always()
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: junit-backend-report
+          path: server/junit-backend.xml
+
+  dependency-audit:
+    name: Python Dependency Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@1edb52594c857e2b5b13128931090f0640537287 # v5.3.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: "server/uv.lock"
+
+      - name: Export locked requirements
+        run: uv export --frozen --no-hashes --output-file /tmp/requirements.txt
+
+      - name: Run pip-audit
+        run: uvx pip-audit --no-deps --disable-pip -r /tmp/requirements.txt

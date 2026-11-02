@@ -8,11 +8,13 @@ SECRET_KEY = os.getenv("SECRET_KEY", "test-secret-key-32-chars-minimum-length-xx
 DEBUG = False
 ALLOWED_HOSTS = ["*"]
 
+
 def _is_installed(name: str) -> bool:
     try:
         return importlib.util.find_spec(name) is not None
-    except (ModuleNotFoundError, ValueError):
+    except ModuleNotFoundError, ValueError:
         return False
+
 
 DOMAIN_APPS = [
     "apps.core",
@@ -37,7 +39,6 @@ INSTALLED_APPS = [
 
 if _is_installed("apps.accounts"):
     AUTH_USER_MODEL = "accounts.User"
-
 
 
 MIDDLEWARE = [
@@ -74,7 +75,6 @@ MAILERS = {
         "BACKEND": "django.core.mail.backends.locmem.EmailBackend",
     }
 }
-
 
 
 CELERY_TASK_ALWAYS_EAGER = True

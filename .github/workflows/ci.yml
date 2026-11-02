@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  backend:
+    name: Backend
+    uses: ./.github/workflows/backend-ci.yml
+
+  frontend:
+    name: Frontend
+    uses: ./.github/workflows/frontend-ci.yml
+
+  ci-passed:
+    name: ci-passed
+    needs: [backend, frontend]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify overall CI status
+        run: |
+          BACKEND_RESULT="${{ needs.backend.result }}"
+          FRONTEND_RESULT="${{ needs.frontend.result }}"
+          echo "Backend workflow result: $BACKEND_RESULT"
+          echo "Frontend workflow result: $FRONTEND_RESULT"
+          if [ "$BACKEND_RESULT" != "success" ] || [ "$FRONTEND_RESULT" != "success" ]; then
+            echo "ERROR: Both backend and frontend workflows must be 'success'."
+            echo "Treating skipped, cancelled, or failed workflows as pipeline failure."
+            exit 1
+          fi
+          echo "All CI checks passed successfully."
+
+  deploy:
+    name: Deploy Stub
+    needs: [ci-passed]
+    if: false # deploy goes here later
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy placeholder
+        run: echo "deploy goes here later"
