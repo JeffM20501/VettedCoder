@@ -20,6 +20,7 @@ def assert_error_envelope_shape(payload: dict) -> None:
     # request_id must be a valid UUID string
     uuid.UUID(str(error["request_id"]))
 
+pytestmark=pytest.mark.django_db
 
 @pytest.mark.spec
 @pytest.mark.integration

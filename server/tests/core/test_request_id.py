@@ -2,6 +2,7 @@ import uuid
 
 import pytest
 
+pytestmark=pytest.mark.django_db
 
 @pytest.mark.spec
 @pytest.mark.integration
