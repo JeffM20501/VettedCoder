@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "drf_spectacular",
+    "django_extensions",
 ] + [app for app in DOMAIN_APPS if _is_installed(app)]
 
 if _is_installed("apps.accounts"):

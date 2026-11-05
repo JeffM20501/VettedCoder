@@ -26,7 +26,7 @@ class VettedCursorPagination(CursorPagination):
                 pass
         return self.page_size
     
-    def _decode_cursor(self,cursor): 
+    def decode_cursor(self,cursor): 
         try:
             return super()._decode_cursor(cursor)
         except Exception:

@@ -20,7 +20,7 @@ urlpatterns: list[URLPattern | URLResolver] = []
 
 
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 from apps.core.health import Health
 
@@ -30,5 +30,8 @@ urlpatterns = [
     path("api/v1/health/", Health.as_view(), name='health_check'),
     path("api/v1/schema/", SpectacularAPIView.as_view(), name='schema'),
     path("api/v1/swagger-ui/", SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    path("api/v1/redoc/", SpectacularRedocView.as_view(url_name='schema'), name='redoc')
+    path("api/v1/redoc/", SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    path("api/v1/", include([
+        path("questions/", include("apps.questions.urls"))
+    ]))
 ]
