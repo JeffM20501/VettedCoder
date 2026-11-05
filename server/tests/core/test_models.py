@@ -4,6 +4,7 @@ from datetime import UTC, datetime
 import pytest
 from django.db import models
 
+pytestmark=pytest.mark.django_db
 
 @pytest.mark.spec
 @pytest.mark.unit

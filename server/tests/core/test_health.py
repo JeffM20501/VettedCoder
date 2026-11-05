@@ -4,6 +4,8 @@ import pytest
 from django.db import OperationalError
 
 
+pytestmark=pytest.mark.django_db
+
 @pytest.mark.spec
 @pytest.mark.integration
 def test_health_check__healthy_services__returns_200_ok(client):
