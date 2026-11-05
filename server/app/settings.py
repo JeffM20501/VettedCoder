@@ -43,6 +43,7 @@ def _is_installed(name: str) -> bool:
 
 DOMAIN_APPS=[
     "apps.core",
+    "apps.questions",
 ]
 
 INSTALLED_APPS = [
@@ -97,7 +98,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "app.wsgi.application"
+ASGI_APPLICATION = "app.asgi.application"
 
 
 # Database
