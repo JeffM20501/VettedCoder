@@ -43,6 +43,7 @@ def _is_installed(name: str) -> bool:
 
 DOMAIN_APPS=[
     "apps.core",
+    "apps.questions",
 ]
 
 INSTALLED_APPS = [
@@ -54,6 +55,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "drf_spectacular",
+    "django_extensions",
 ] + [app for app in DOMAIN_APPS if _is_installed(app)]
 
 if _is_installed("apps.accounts"):
@@ -97,7 +99,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "app.wsgi.application"
+ASGI_APPLICATION = "app.asgi.application"
 
 
 # Database
