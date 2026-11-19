@@ -40,8 +40,8 @@ urlpatterns = [
         path("questions/", include("apps.questions.urls")),
         path("orgs/<slug:slug>/members/", include("apps.organizations.urls")),
         path("auth/", include([
-            path("me/", include("apps.accounts.urls")),
-            path("register/",TokenObtainPairView.as_view(), name="register"),
+            path("", include("apps.accounts.urls")),
+            path("login/",TokenObtainPairView.as_view(), name="register"),
             path("refresh/", TokenRefreshView.as_view(),name="refresh"),
             path("verify/", TokenVerifyView.as_view(), name="verify")
         ]))
