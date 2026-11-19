@@ -111,7 +111,7 @@ def test_error_envelope__unhandled_exception_or_db_error__never_leaks_sql_or_tra
 @pytest.mark.spec
 @pytest.mark.integration
 def test_error_envelope__request_id__matches_response_header(client):
-    custom_request_id = str(uuid.uuid4())
+    custom_request_id = str(uuid.uuid7())
     response = client.get(
         "/api/v1/non-existent-endpoint-uuid/",
         HTTP_X_REQUEST_ID=custom_request_id,

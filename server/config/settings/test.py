@@ -40,6 +40,14 @@ INSTALLED_APPS = [
 if _is_installed("apps.accounts"):
     AUTH_USER_MODEL = "accounts.User"
 
+REST_FRAMEWORK={
+    "DEFAULT_AUTHENTICATION_CLASSES":(
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication"
+    ),
+    "EXCEPTION_HANDLER": "apps.core.exceptions.custom_exception_handler",
+}
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
