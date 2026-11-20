@@ -10,7 +10,7 @@ def test_request_id__client_provides_header__echoed_in_response_and_context(clie
     """
     When client sends X-Request-ID header, the application preserves and echoes it back.
     """
-    custom_id = str(uuid.uuid4())
+    custom_id = str(uuid.uuid7())
     response = client.get("/api/v1/health/", HTTP_X_REQUEST_ID=custom_id)
     assert response.headers.get("X-Request-ID") == custom_id
 

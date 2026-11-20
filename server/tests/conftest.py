@@ -17,20 +17,18 @@ def clock():
 
     class ClockController:
         def __init__(self):
+            self._travel = None
             self._traveller = None
 
         def set(self, target_time):
-            if self._traveller:
-                self._traveller.stop()
-            self._traveller = time_machine.travel(target_time, tick=False)
-            return self._traveller.start()
+            self.stop()
+            self._travel = time_machine.travel(target_time, tick=False)
+            self._traveller = self._travel.start()
+            return self._traveller
 
-        def tick(self, duration=None):
+        def tick(self, duration=1):
             if self._traveller:
-                if duration is not None:
-                    self._traveller.shift(duration)
-                else:
-                    self._traveller.tick()
+                self._traveller.shift(duration)
 
         def move_to(self, target_time):
             if self._traveller:
@@ -38,11 +36,15 @@ def clock():
             else:
                 self.set(target_time)
 
+        def stop(self):
+            if self._travel:
+                self._travel.stop()
+                self._travel = None
+                self._traveller = None
+
     controller = ClockController()
     yield controller
-    if controller._traveller:
-        controller._traveller.stop()
-
+    controller.stop()
 
 @pytest.fixture
 def fake_redis():
