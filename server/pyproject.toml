@@ -30,6 +30,7 @@ dev = [
     "django-stubs>=6.1.2",
     "factory-boy>=3.3.3",
     "fakeredis>=2.40.0",
+    "hypothesis>=6.170.17",
     "moto>=5.2.5",
     "mypy>=2.4.1",
     "psycopg[binary]>=3.3.6",
@@ -37,6 +38,7 @@ dev = [
     "pytest-asyncio>=1.4.1",
     "pytest-cov>=7.1.0",
     "pytest-django>=4.14.0",
+    "pytest-randomly>=5.1.0",
     "respx>=0.23.1",
     "ruff>=0.17.3",
     "time-machine>=3.6.0",
@@ -88,5 +90,19 @@ warn_unused_ignores = true
 
 [tool.django-stubs]
 django_settings_module = "config.settings.test"
+
+[tool.coverage.run]
+branch = true
+source = ["apps", "config"]
+omit = [
+    "*/migrations/*",
+    "tests/*",
+    "*/tests/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+
 
 
