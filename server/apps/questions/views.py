@@ -1,5 +1,5 @@
 from rest_framework.generics import ListAPIView
-from .model import Questions
+from .models import Questions
 from apps.core.pagination import VettedCursorPagination
 from .serializers import QuestionSerlializer
 
