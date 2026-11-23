@@ -23,6 +23,11 @@ from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 from apps.core.health import Health
+from rest_framework_simplejwt.views import(
+    TokenVerifyView,
+    TokenRefreshView,
+    TokenObtainPairView
+)
 
 
 urlpatterns = [
@@ -32,6 +37,16 @@ urlpatterns = [
     path("api/v1/swagger-ui/", SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path("api/v1/redoc/", SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
     path("api/v1/", include([
-        path("questions/", include("apps.questions.urls"))
+        path("questions/", include("apps.questions.urls")),
+        path("orgs/<slug:slug>/members/", include("apps.organizations.urls")),
+        path("auth/", include([
+            path("", include("apps.accounts.urls")),
+            path("login/",TokenObtainPairView.as_view(), name="register"),
+            path("refresh/", TokenRefreshView.as_view(),name="refresh"),
+            path("verify/", TokenVerifyView.as_view(), name="verify")
+        ]))
     ]))
 ]
+
+handler404="apps.core.exceptions.json_404_view"
+handler500="apps.core.exceptions.json_500_view"

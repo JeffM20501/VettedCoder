@@ -1,5 +1,8 @@
 from rest_framework.pagination import CursorPagination, _positive_int
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, NotFound
+class InvalidCursor(ValidationError):
+    default_detail = "Invalid Cursor"
+    default_code = "invalid_cursor"
 
 class VettedCursorPagination(CursorPagination):
     page_size=25
@@ -26,11 +29,9 @@ class VettedCursorPagination(CursorPagination):
                 pass
         return self.page_size
     
-    def decode_cursor(self,cursor): 
+    def decode_cursor(self,request): 
         try:
-            return super()._decode_cursor(cursor)
-        except Exception:
+            return super().decode_cursor(request)
+        except NotFound:
             #overide drf NotFound for ValidationError
-            raise ValidationError(
-                {"error":{"code":"invalid_cursor", "message":"Invalid cursor"}}
-            )
+            raise InvalidCursor()

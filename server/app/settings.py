@@ -44,6 +44,8 @@ def _is_installed(name: str) -> bool:
 DOMAIN_APPS=[
     "apps.core",
     "apps.questions",
+    "apps.accounts",
+    "apps.organizations"
 ]
 
 INSTALLED_APPS = [
@@ -62,6 +64,11 @@ if _is_installed("apps.accounts"):
     AUTH_USER_MODEL = "accounts.User"
 
 REST_FRAMEWORK={
+    "DEFAULT_AUTHENTICATION_CLASSES":(
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication"
+    ),
+    "EXCEPTION_HANDLER": "apps.core.exceptions.custom_exception_handler",
     "DEFAULT_SCHEMA_CLASS":"drf_spectacular.openapi.AutoSchema",
 }
 
@@ -74,6 +81,7 @@ SPECTACULAR_SETTINGS={
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "apps.core.middleware.RequestIDMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
