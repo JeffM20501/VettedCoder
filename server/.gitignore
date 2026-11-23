@@ -308,3 +308,6 @@ logs/
 
 .env.docker
 docker-volumes/
+
+
+*spec_dump.txt
