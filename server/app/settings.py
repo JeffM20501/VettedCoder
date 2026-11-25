@@ -15,6 +15,9 @@ import importlib.util
 import dj_database_url
 import os
 from dotenv import load_dotenv
+from datetime import timedelta
+
+
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -56,6 +59,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "rest_framework_simplejwt",
     "drf_spectacular",
     "django_extensions",
 ] + [app for app in DOMAIN_APPS if _is_installed(app)]
@@ -70,6 +74,13 @@ REST_FRAMEWORK={
     ),
     "EXCEPTION_HANDLER": "apps.core.exceptions.custom_exception_handler",
     "DEFAULT_SCHEMA_CLASS":"drf_spectacular.openapi.AutoSchema",
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "REFRESH_TOKEN_LIFETIME":timedelta(days=1),
+    "ALGORITHM":"HS256",
+    "SIGNING_KEY":os.getenv("SIGNING_KEY")
 }
 
 SPECTACULAR_SETTINGS={
@@ -122,6 +133,13 @@ DATABASES = {
     )
 }
 
+PASSWORD_HASHERS = [
+    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
+    "django.contrib.auth.hashers.Argon2PasswordHasher",
+    "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
+    "django.contrib.auth.hashers.ScryptPasswordHasher",
+]
 
 # Password validation
 # https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
