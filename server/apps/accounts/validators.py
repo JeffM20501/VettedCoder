@@ -1,6 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
-
+from django.db.utils import IntegrityError
 
 def validate_username(value):
     User=get_user_model()
@@ -21,5 +21,15 @@ def validate_email(value):
         raise ValidationError("Invalid email address")
     
     if User.objects.filter(email__iexact=value).exists():
-        raise ValidationError("Email is connected to another account")
+        raise ValidationError("Email is taken")
+    return value
+
+def validate_purpose(value):
+    PURPOSE=["verify_email", "reset_password"]
+    
+    if not value:
+        raise ValidationError("Purpose required")
+    
+    if value not in PURPOSE:
+        raise ValidationError("Invalid purpose")
     return value
