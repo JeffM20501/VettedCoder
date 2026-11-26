@@ -1,6 +1,5 @@
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
-from django.db.utils import IntegrityError
 
 def validate_username(value):
     User=get_user_model()
