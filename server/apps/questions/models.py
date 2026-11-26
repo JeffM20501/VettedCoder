@@ -1,5 +1,7 @@
 from django.db import models
+from apps.core.models import BaseModel
 
-
-class Questions(models.Model):
-    pass
+class Questions(BaseModel):
+    
+    class Meta:
+        db_table="questions"

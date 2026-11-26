@@ -1,17 +1,12 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import UniqueConstraint,Q,CheckConstraint
-from apps.core.models import BaseModel
+from apps.core.models import BaseModel, SoftDeleteModel
 from django.db.models.functions import Upper
 from apps.accounts.validators import validate_purpose
 from datetime import timedelta
 from django.utils import timezone
 import uuid
-
-PURPOSE=[
-    ("reset_password", "Rest Password"),
-    ("verify_email", "Verify Email"),
-]
 
 def user_auth_token_exipiry():
     return timezone.now()+timedelta(minutes=5)
@@ -40,6 +35,15 @@ class GuestProfile(BaseModel):
 
 
 class UserAuthToken(BaseModel):
+    
+    RESET_PASSWORD="reset_password"
+    VERIFY_EMAIL="verify_email"
+    
+    PURPOSE={
+        RESET_PASSWORD:"Reset Password",
+        VERIFY_EMAIL:"Verify Email"
+    }
+    
     user=models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_auth_tokens")
     purpose=models.CharField(max_length=20, choices=PURPOSE, validators=[validate_purpose])
     token_hash=models.TextField(unique=True)
